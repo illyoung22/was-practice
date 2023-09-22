@@ -8,9 +8,12 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class CustomWebApplicationServer {
     private final int port;
+    private final ExecutorService executorService = Executors.newFixedThreadPool(10);
     private final Logger logger = LoggerFactory.getLogger(CustomWebApplicationServer.class);
     public CustomWebApplicationServer(int port) {
         this.port = port;
@@ -26,9 +29,9 @@ public class CustomWebApplicationServer {
             while ((clientSocket = serverSocket.accept())  != null) {
                 logger.info("[CustomWebApplicationServer] client connetcted");
                 /**
-                 * STEP2 -사용자 요청이 들어올 때마다 THREAD를 새로 생성하여 사용자 요청을 처리하도록 한다.
+                 * STEP3-thread pool을 적용해 안정적인 서비스가 가능하도록 한다.
                  */
-                new Thread(new ClientRequestHandler(clientSocket)).start();
+                executorService.execute(new ClientRequestHandler(clientSocket));
 
             }
         }
